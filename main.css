@@ -1,0 +1,15 @@
+.unit {
+    background-color: #E6E6E6;
+    width: 64px;
+    height: 64px;
+    margin: 4px;
+    text-align: center;
+}
+
+#gameBoard {
+    margin: 0 auto;
+}
+
+#main {
+    width: 100%;
+}
