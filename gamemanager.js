@@ -14,8 +14,6 @@ GameManager.prototype.moveCount;
 GameManager.prototype.gameOver;
 GameManager.prototype.moveHistory;
 
-GameManager.prototype.testing_alt;
-
 function GameManager() {
     // calculate the winning combinations required for the game to be over
     this.calculateAndSetWinningCombs();
@@ -26,7 +24,6 @@ function GameManager() {
 
 GameManager.prototype.startGame = function() {
     this.moveCount = 0;
-    this.testing_alt = 1;
     this.gameOver = false;
 
     // init an empty board
@@ -73,33 +70,43 @@ GameManager.prototype.calculateAndSetWinningCombs = function() {
 
 GameManager.prototype.computerGo = function() {
     var result;
-
-    // 1st round
+    // 0th round
     // always take a corner
     if(this.moveCount == 0) {
         result = this.computerGetAvailableCornerIndex();
     // 2nd round
-    // always take another corner, unless the player has taken an immediately adjacent position to your first move
-    // if that happened, then take the center
     } else if(this.moveCount == 2) {
-        if(this.moveHistory[1] == 4) {
-            result = 1;
-        } else if(this.lastPlayerClaimWasAjacentToComputerFirstClaim()) {
-            result = 4;
+        // if the human player's first move was to take the middle, then choose a spot adjacent to
+        // the cpu's first move
+        if(this.moveHistory[1] == this.getMiddleSpotIndex()) {
+            // get the first adjacent spot to our first move
+            result = this.getAdjacentSpotIndexes(this.moveHistory[0])[0];
+        // if the player's first move was to take an immediately adjacent spot to the cpu's first move
+        // take the middle spot
+        } else if(this.areSpotIndexesAdjacent(this.moveHistory[0], this.moveHistory[1])) {
+            result = this.getMiddleSpotIndex();
         } else { 
             result = this.computerGetAvailableCornerIndex();
         }
-    // 3rd and 5th round
-    // being to attempt to make a winning move, if that doesn't work take another corner
+    // 4th and 6th round
     } else if(this.moveCount == 4 || this.moveCount == 6) {
-        result = this.computerGetWinningIndex();
+        // check if we are about to win
+        result = this.computerGetWinningIndex(this.UNIT_COMP_CLAIMED);
         if(result == -1) {
-            result = this.computerGetAvailableCornerIndex();
+            // if we aren't about to win, make sure the human player isn't about to win either
+            result = this.computerGetWinningIndex(this.UNIT_PLAYER_CLAIMED);
+            if(result == -1) {
+                // if no one is about to win, take another corner
+                result = this.computerGetAvailableCornerIndex();
+            }
         }
-    // 7th round
-    // worst case scenario win
+    // 8th round
+    // worst case scenario win or a draw
     } else if(this.moveCount == 8) {
-        result = this.computerGetWinningIndex();
+        result = this.computerGetWinningIndex(this.UNIT_COMP_CLAIMED);
+        if(result == -1) {
+            result = this.getAnyFreeSpot();
+        }
     }
 
     this.boardState[result] = this.UNIT_COMP_CLAIMED;
@@ -108,36 +115,66 @@ GameManager.prototype.computerGo = function() {
     this.moveCount++;
 };
 
-GameManager.prototype.lastPlayerClaimWasAjacentToComputerFirstClaim = function() {
+GameManager.prototype.getMiddleSpotIndex = function() {
+    return ((this.BOARD_DIM * this.BOARD_DIM) - 1) / 2;
+};
+
+GameManager.prototype.getRowIndex = function(spotIndex) {
+    return parseInt(spotIndex / this.BOARD_DIM);
+};
+
+GameManager.prototype.getColIndex = function(spotIndex) {
+    return spotIndex % this.BOARD_DIM;
+};
+
+GameManager.prototype.areSpotIndexesAdjacent = function(indexOne, indexTwo) {
     var result = false;
-    if(this.moveHistory[0] == 0 && (this.moveHistory[1] == 1 || this.moveHistory[1] == 3)) {
+    
+    var colOne = this.getColIndex(indexOne);
+    var colTwo = this.getColIndex(indexTwo);
+
+    var rowOne = this.getRowIndex(indexOne);
+    var rowTwo = this.getRowIndex(indexTwo);
+
+    // if the rows are the same and the cols are off by one
+    if(rowOne == rowTwo && (colOne - 1 == colTwo || colOne == colTwo - 1)) {
         result = true;
-    } else if(this.moveHistory[0] == 2 && (this.moveHistory[1] == 1 || this.moveHistory[1] == 5)) {
-        result = true;
-    } else if(this.moveHistory[0] == 6 && (this.moveHistory[1] == 7 || this.moveHistory[1] == 3)) {
-        result = true;
-    } else if(this.moveHistory[0] == 8 && (this.moveHistory[1] == 7 || this.moveHistory[1] == 5)) {
-        result = true;
+    // if the cols are the same and the rows are off by one
+    } else if(colOne == colTwo && (rowOne - 1 == rowTwo || rowOne == rowTwo - 1)) {
+        result = true
+    }
+    
+    return result;
+};
+
+GameManager.prototype.getAnyFreeSpot = function() {
+    var result;
+    var len = this.boardState.length;
+    for(var i = 0; i < len; i++) {
+        if(this.boardState[i] == this.UNIT_UNCLAIMED) {
+            result = i;
+            break;
+        }
     }
     return result;
 };
 
-GameManager.prototype.computerGetWinningIndex = function() {
+GameManager.prototype.computerGetWinningIndex = function(code) {
     var result = -1;
     var len = this.winningCombs.length;
     for(var i = 0; i < len; i++) {
         var innerLen = this.winningCombs[i].length;
         var emptyIndex = -1;
-        var computerCount = 0;
+        var playerCodeCount = 0;
         for(var j = 0; j < innerLen; j++) {
-            var code = this.boardState[this.winningCombs[i][j]];
-            if(code == this.UNIT_COMP_CLAIMED) {
-                computerCount++;
-            } else if(code == this.UNIT_UNCLAIMED) {
+            var claimedCode = this.boardState[this.winningCombs[i][j]];
+            if(claimedCode == code) {
+                playerCodeCount++;
+            } else if(claimedCode == this.UNIT_UNCLAIMED) {
                 emptyIndex = this.winningCombs[i][j];
             }
         }
-        if(emptyIndex != -1 && computerCount == this.BOARD_DIM - 1) {
+        if(emptyIndex != -1 && playerCodeCount == this.BOARD_DIM - 1) {
             result = emptyIndex;
             break;
         }
@@ -155,16 +192,16 @@ GameManager.prototype.computerGetAvailableCornerIndex = function() {
 
     var freeCornerArray = new Array();
     if(this.isBoardIndexFree(topLeft)) {
-        freeCornerArray.push({"index" : topLeft, "rating" : this.getCornerRating(topLeft)});
+        freeCornerArray.push({"index" : topLeft, "rating" : this.getNumAdjacentSpotsOfType(topLeft, this.UNIT_UNCLAIMED)});
     }
     if(this.isBoardIndexFree(topRight)) {
-        freeCornerArray.push({"index" : topRight, "rating" : this.getCornerRating(topRight)});
+        freeCornerArray.push({"index" : topRight, "rating" : this.getNumAdjacentSpotsOfType(topRight, this.UNIT_UNCLAIMED)});
     }
     if(this.isBoardIndexFree(bottomLeft)) {
-        freeCornerArray.push({"index" : bottomLeft, "rating" : this.getCornerRating(bottomLeft)});
+        freeCornerArray.push({"index" : bottomLeft, "rating" : this.getNumAdjacentSpotsOfType(bottomLeft, this.UNIT_UNCLAIMED)});
     }
     if(this.isBoardIndexFree(bottomRight)) { 
-        freeCornerArray.push({"index" : bottomRight, "rating" : this.getCornerRating(bottomRight)});
+        freeCornerArray.push({"index" : bottomRight, "rating" : this.getNumAdjacentSpotsOfType(bottomRight, this.UNIT_UNCLAIMED)});
     }
     
     // sort the corner options by their rating
@@ -183,34 +220,33 @@ GameManager.prototype.computerGetAvailableCornerIndex = function() {
     return result;
 };
 
-GameManager.prototype.getCornerRating = function(index) {
+GameManager.prototype.getAdjacentSpotIndexes = function(spotIndex) {
+    var result = new Array();
+    
+    var rowIndex = this.getRowIndex(spotIndex);
+    var colIndex = this.getColIndex(spotIndex);
+
+    if(rowIndex > 0) {
+        result.push(this.gridCoordsToStateIndex(colIndex, rowIndex - 1));
+    }
+    if(rowIndex < this.BOARD_DIM - 1) {
+        result.push(this.gridCoordsToStateIndex(colIndex, rowIndex + 1));
+    }
+    if(colIndex > 0) {
+        result.push(this.gridCoordsToStateIndex(colIndex - 1, rowIndex));
+    }
+    if(colIndex < this.BOARD_DIM - 1) {
+        result.push(this.gridCoordsToStateIndex(colIndex + 1, rowIndex));
+    }
+    return result;
+};
+
+GameManager.prototype.getNumAdjacentSpotsOfType = function(spotIndex, code) {
     var result = 0;
-    if(index == 0) {
-        if(this.boardState[1] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-        if(this.boardState[3] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-    } else if(index == 2) {
-        if(this.boardState[1] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-        if(this.boardState[5] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-    } else if(index == 6) {
-        if(this.boardState[3] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-        if(this.boardState[7] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-    } else if(index == 8) {
-        if(this.boardState[5] == this.UNIT_UNCLAIMED) {
-            result++;
-        }
-        if(this.boardState[7] == this.UNIT_UNCLAIMED) {
+    var adjacentSpotIndices = this.getAdjacentSpotIndexes(spotIndex);
+    var len = adjacentSpotIndices.length;
+    for(var i = 0; i < len; i++) {
+        if(this.boardState[adjacentSpotIndices[i]] == code) {
             result++;
         }
     }
@@ -313,20 +349,33 @@ GameManager.prototype.handleGameOver = function(winResult) {
     this.gameOver = true;
 };
 
+GameManager.prototype.checkGameState = function() {
+    // check if the game has been won
+    var winResult = this.checkWin();
+    if(winResult > 0) {
+        // handle messaging the game result
+        this.handleGameOver(winResult);
+    }
+};
+
 GameManager.prototype.handleBoardUnitClick = function(i, j) {
     if(!this.gameOver) {
         // get the target state index
         var stateIndex = this.gridCoordsToStateIndex(i, j);
         // if the player selected a valid move then continue, else do nothing
         if(this.playerGo(stateIndex)) {
-            // let the computer go
-            this.computerGo();
-            // check if the game has been won
-            var winResult = this.checkWin();
-            if(winResult > 0) {
-            // handle messaging the game result
-                this.handleGameOver(winResult);
+            
+            // the player may have won, check
+            this.checkGameState();
+            
+            if(!this.gameOver) {
+                // let the computer go
+                this.computerGo();
+            
+                // the computer may have won, check
+                this.checkGameState();
             }
+
             // refresh the view of the game board
             this.refreshDraw();
         }
