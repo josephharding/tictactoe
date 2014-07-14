@@ -3,9 +3,9 @@ $(document).ready(function() {
    
     // load the correct css file based on the user agent
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) { 
-        $("head").append("<link rel='stylesheet' type='text/css' href='mobile.css'>");
+        $("head").append("<link rel='stylesheet' type='text/css' href='css/mobile.css'>");
     } else {
-        $("head").append("<link rel='stylesheet' type='text/css' href='screen.css'>", function() {
+        $("head").append("<link rel='stylesheet' type='text/css' href='css/screen.css'>", function() {
             alert("load complete");   
         });
     }

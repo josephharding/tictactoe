@@ -16,7 +16,7 @@ function AIManager(boardManager) {
 reset the aimanager's writable game session data
 */
 AIManager.prototype.resetMoveHistory = function() {
-    this.mMoveHistory = new Array(9);
+    this.mMoveHistory = new Array(BoardManager.prototype.BOARD_DIM * BoardManager.prototype.BOARD_DIM);
     this.mMoveCount = 0;
 };
 
@@ -57,7 +57,8 @@ AIManager.prototype.computerGo = function() {
         // if the human player's first move was to take the middle, then choose a spot adjacent to
         // the cpu's first move
         if(this.mMoveHistory[1] == this.mBoardManager.getMiddleSpotIndex()) {
-            // get the first adjacent spot to our first move
+            // get the first adjacent spot to our first move, this is guaranteed to exist
+            // as our first move is a corner, the next move was the middle, so we have two of these available
             result = this.mBoardManager.getAdjacentSpotIndexes(this.mMoveHistory[0])[0];
         // if the player's first move was to take an immediately adjacent spot to the cpu's first move
         // take the middle spot
