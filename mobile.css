@@ -1,15 +1,15 @@
 
 .tttText {
-    font-size: 96px;
+    font-size: 48px;
     margin: 0 auto;
     text-align: center;
 }
 
 .spot {
     background-color: #E6E6E6;
-    width: 256px;
-    height: 256px;
-    margin: 16px;
+    margin: 8px;
+    width: 128px;
+    height: 128px;
 }
 
 .tttButton {
@@ -26,20 +26,16 @@
 
 .gameOverMessage {
     display: none;
-    margin-top: 160px;
+    margin-top: 40px;
+}
+
+#gameBoard {
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #game {
     margin: 0 auto;
     display: table;
-}
-
-#gameBoard {
-    margin-top: 160px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-#main {
-    width: 100%;
 }

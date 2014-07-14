@@ -8,9 +8,21 @@
 <script type="text/javascript" src="boardmanager.js"></script>
 <script type="text/javascript" src="gamemanager.js"></script>
 <script type="text/javascript" src="main.js"></script>
+
+<!-- this javascript fires when all the page's content, including the dynamic CSS, finished loading -->
+<script>
+function showGameBoard() {
+    $("#main").show();
+}
+</script>
+
 </head>
 
-<body>
+<body onload="showGameBoard()">
+<!--
+NOTE: the main content of the page is hidden by default, this allows for dynamic loading of CSS without 
+the momentary flash of unstyled divs
+-->
 <div id="main" style="display:none;">
 <div id="game">
     <table id="gameBoard">
@@ -32,7 +44,7 @@
     </table>
     <input id="playAgainButton" class="tttButton tttText" type="submit" value="Play Again">
     <div id="humanWin" class="gameOverMessage tttText">You Won! ... wait, how did that happen?</div>
-    <div id="cpuWin" class="gameOverMessage tttText">CPU Won!</div>
+    <div id="cpuWin" class="gameOverMessage tttText">The Computer Won!</div>
     <div id="draw" class="gameOverMessage tttText">Draw!</div>
 </div>
 </div>

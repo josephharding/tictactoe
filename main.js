@@ -3,11 +3,12 @@ $(document).ready(function() {
    
     // load the correct css file based on the user agent
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) { 
-        $("head").append("<link rel='stylesheet' type='text/css' href='main_mobile.css'>");
+        $("head").append("<link rel='stylesheet' type='text/css' href='mobile.css'>");
     } else {
-        $("head").append("<link rel='stylesheet' type='text/css' href='main.css'>");
+        $("head").append("<link rel='stylesheet' type='text/css' href='screen.css'>", function() {
+            alert("load complete");   
+        });
     }
-    
     // create the game manager object
     var gameManager = new GameManager();
 
@@ -26,8 +27,4 @@ $(document).ready(function() {
         gameManager.handlePlayAgainClick();
         $(this).fadeTo(200, 1.0);
     });
-
-    // only show the page once the css has been loaded
-    $("#main").show();
-
 });
