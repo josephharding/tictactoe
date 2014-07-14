@@ -1,4 +1,6 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
 <title>TicTacToe</title>
 <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
@@ -11,24 +13,30 @@
 
 <body>
 <div id="main">
-<table id="gameBoard">
-<tr>
-<td class="spot"></td>
-<td class="spot"></td>
-<td class="spot"></td>
-</tr>
-<tr>
-<td class="spot"></td>
-<td class="spot"></td>
-<td class="spot"></td>
-</tr>
-<tr>
-<td class="spot"></td>
-<td class="spot"></td>
-<td class="spot"></td>
-</tr>
-</table>
-<div id="messages"></div>
+<div id="game">
+    <table id="gameBoard">
+    <tr>
+    <td class="spot tttText"></td>
+    <td class="spot tttText"></td>
+    <td class="spot tttText"></td>
+    </tr>
+    <tr>
+    <td class="spot tttText"></td>
+    <td class="spot tttText"></td>
+    <td class="spot tttText"></td>
+    </tr>
+    <tr>
+    <td class="spot tttText"></td>
+    <td class="spot tttText"></td>
+    <td class="spot tttText"></td>
+    </tr>
+    </table>
+    <input id="playAgainButton" class="tttButton tttText" type="submit" value="Play Again">
+    <div id="humanWin" class="gameOverMessage tttText">You Won! ... wait, how did that happen?</div>
+    <div id="cpuWin" class="gameOverMessage tttText">CPU Won!</div>
+    <div id="draw" class="gameOverMessage tttText">Draw!</div>
+</div>
 </div>
 </body>
+
 </html>

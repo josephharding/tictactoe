@@ -34,7 +34,7 @@ GameManager.prototype.startGame = function() {
     this.refreshDraw();
 }
 
-GameManager.prototype.playerGo = function(i, j) {
+GameManager.prototype.humanGo = function(i, j) {
     var result = false;
     var index = this.mBoardManager.gridCoordsToStateIndex(i, j);
     if(this.mBoardManager.isBoardIndexCode(index, this.SPOT_UNCLAIMED)) {
@@ -109,16 +109,15 @@ GameManager.prototype.handleGameOver = function(winResult) {
     var message;
     switch(winResult) {
         case this.GAME_OVER_WIN_HUMAN:
-            message = "You beat the computer! ... how did that happen?";
+            $("#humanWin").show();
             break;
         case this.GAME_OVER_WIN_CPU:
-            message = "Only Human."
+            $("#cpuWin").show();
             break;
         default:
-            message = "Draw."
+            $("#draw").show();
             break;
     }
-    $("#messages").text(message);
 
     this.mGameOver = true;
 };
@@ -132,10 +131,15 @@ GameManager.prototype.checkGameState = function() {
     }
 };
 
+GameManager.prototype.handlePlayAgainClick = function() {
+    $(".gameOverMessage").hide();
+    this.startGame();
+};
+
 GameManager.prototype.handleBoardUnitClick = function(i, j) {
     if(!this.mGameOver) {
         // if the player selected a valid move then continue, else do nothing
-        if(this.playerGo(i, j)) {
+        if(this.humanGo(i, j)) {
             
             // the player may have won, check
             this.checkGameState();
