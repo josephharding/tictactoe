@@ -4,9 +4,9 @@
 // number of units per board dimension
 GameManager.prototype.BOARD_DIM = 3;
 
-GameManager.prototype.UNIT_UNCLAIMED = 0;
-GameManager.prototype.UNIT_COMP_CLAIMED = -1;
-GameManager.prototype.UNIT_PLAYER_CLAIMED = 1;
+GameManager.prototype.SPOT_UNCLAIMED = 0;
+GameManager.prototype.SPOT_CLAIMED_CPU = -1;
+GameManager.prototype.SPOT_CLAIMED_HUMAN = 1;
 
 GameManager.prototype.boardState;
 GameManager.prototype.winningCombs;
@@ -26,13 +26,12 @@ GameManager.prototype.startGame = function() {
     this.moveCount = 0;
     this.gameOver = false;
 
-    // init an empty board
+    // init an empty board and move history
     this.boardState = new Array(this.BOARD_DIM * this.BOARD_DIM);
-    for(var i = 0; i < this.boardState.length; i++) {
-        this.boardState[i] = this.UNIT_UNCLAIMED;
-    }
-
     this.moveHistory = new Array(this.BOARD_DIM * this.BOARD_DIM);
+    for(var i = 0; i < this.boardState.length; i++) {
+        this.boardState[i] = this.SPOT_UNCLAIMED;
+    }
 
     // the computer goes first
     this.computerGo();
@@ -58,6 +57,7 @@ GameManager.prototype.calculateAndSetWinningCombs = function() {
         this.winningCombs.push(currentRow);
         this.winningCombs.push(currentCol);
 
+        // calculating diagonals
         bottomLeftDiag.push(i * (this.BOARD_DIM + 1));
         bottomRightDiag.push((i * 2) + (this.BOARD_DIM - 1));
     }
@@ -91,10 +91,10 @@ GameManager.prototype.computerGo = function() {
     // 4th and 6th round
     } else if(this.moveCount == 4 || this.moveCount == 6) {
         // check if we are about to win
-        result = this.computerGetWinningIndex(this.UNIT_COMP_CLAIMED);
+        result = this.computerGetWinningIndex(this.SPOT_CLAIMED_CPU);
         if(result == -1) {
             // if we aren't about to win, make sure the human player isn't about to win either
-            result = this.computerGetWinningIndex(this.UNIT_PLAYER_CLAIMED);
+            result = this.computerGetWinningIndex(this.SPOT_CLAIMED_HUMAN);
             if(result == -1) {
                 // if no one is about to win, take another corner
                 result = this.computerGetAvailableCornerIndex();
@@ -103,13 +103,13 @@ GameManager.prototype.computerGo = function() {
     // 8th round
     // worst case scenario win or a draw
     } else if(this.moveCount == 8) {
-        result = this.computerGetWinningIndex(this.UNIT_COMP_CLAIMED);
+        result = this.computerGetWinningIndex(this.SPOT_CLAIMED_CPU);
         if(result == -1) {
             result = this.getAnyFreeSpot();
         }
     }
 
-    this.boardState[result] = this.UNIT_COMP_CLAIMED;
+    this.boardState[result] = this.SPOT_CLAIMED_CPU;
     this.moveHistory[this.moveCount] = result;
 
     this.moveCount++;
@@ -151,7 +151,7 @@ GameManager.prototype.getAnyFreeSpot = function() {
     var result;
     var len = this.boardState.length;
     for(var i = 0; i < len; i++) {
-        if(this.boardState[i] == this.UNIT_UNCLAIMED) {
+        if(this.boardState[i] == this.SPOT_UNCLAIMED) {
             result = i;
             break;
         }
@@ -170,7 +170,7 @@ GameManager.prototype.computerGetWinningIndex = function(code) {
             var claimedCode = this.boardState[this.winningCombs[i][j]];
             if(claimedCode == code) {
                 playerCodeCount++;
-            } else if(claimedCode == this.UNIT_UNCLAIMED) {
+            } else if(claimedCode == this.SPOT_UNCLAIMED) {
                 emptyIndex = this.winningCombs[i][j];
             }
         }
@@ -192,16 +192,16 @@ GameManager.prototype.computerGetAvailableCornerIndex = function() {
 
     var freeCornerArray = new Array();
     if(this.isBoardIndexFree(topLeft)) {
-        freeCornerArray.push({"index" : topLeft, "rating" : this.getNumAdjacentSpotsOfType(topLeft, this.UNIT_UNCLAIMED)});
+        freeCornerArray.push({"index" : topLeft, "rating" : this.getNumAdjacentSpotsOfType(topLeft, this.SPOT_UNCLAIMED)});
     }
     if(this.isBoardIndexFree(topRight)) {
-        freeCornerArray.push({"index" : topRight, "rating" : this.getNumAdjacentSpotsOfType(topRight, this.UNIT_UNCLAIMED)});
+        freeCornerArray.push({"index" : topRight, "rating" : this.getNumAdjacentSpotsOfType(topRight, this.SPOT_UNCLAIMED)});
     }
     if(this.isBoardIndexFree(bottomLeft)) {
-        freeCornerArray.push({"index" : bottomLeft, "rating" : this.getNumAdjacentSpotsOfType(bottomLeft, this.UNIT_UNCLAIMED)});
+        freeCornerArray.push({"index" : bottomLeft, "rating" : this.getNumAdjacentSpotsOfType(bottomLeft, this.SPOT_UNCLAIMED)});
     }
     if(this.isBoardIndexFree(bottomRight)) { 
-        freeCornerArray.push({"index" : bottomRight, "rating" : this.getNumAdjacentSpotsOfType(bottomRight, this.UNIT_UNCLAIMED)});
+        freeCornerArray.push({"index" : bottomRight, "rating" : this.getNumAdjacentSpotsOfType(bottomRight, this.SPOT_UNCLAIMED)});
     }
     
     // sort the corner options by their rating
@@ -254,13 +254,13 @@ GameManager.prototype.getNumAdjacentSpotsOfType = function(spotIndex, code) {
 };
 
 GameManager.prototype.isBoardIndexFree = function(index) {
-    return this.boardState[index] == this.UNIT_UNCLAIMED;
+    return this.boardState[index] == this.SPOT_UNCLAIMED;
 };
 
 GameManager.prototype.playerGo = function(index) {
     var result = false;
     if(this.isBoardIndexFree(index)) {
-        this.boardState[index] = this.UNIT_PLAYER_CLAIMED;
+        this.boardState[index] = this.SPOT_CLAIMED_HUMAN;
         this.moveHistory[this.moveCount] = index;
         this.moveCount++;
         result = true;
@@ -280,10 +280,10 @@ GameManager.prototype.refreshDraw = function() {
             var character;
             var val = classScope.boardState[classScope.gridCoordsToStateIndex(i, j)];
             switch(val) {
-                case classScope.UNIT_PLAYER_CLAIMED:
+                case classScope.SPOT_CLAIMED_HUMAN:
                     character = "X";
                     break;
-                case classScope.UNIT_COMP_CLAIMED:
+                case classScope.SPOT_CLAIMED_CPU:
                     character = "O";
                     break;
                 default:
