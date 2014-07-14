@@ -1,4 +1,6 @@
 
+GameManager.prototype.CPU_TURN_DELAY = 800;
+
 GameManager.prototype.SPOT_UNCLAIMED = 0;
 GameManager.prototype.SPOT_CLAIMED_CPU = -1;
 GameManager.prototype.SPOT_CLAIMED_HUMAN = 1;
@@ -10,6 +12,7 @@ GameManager.prototype.GAME_OVER_DRAW = 1;
 GameManager.prototype.mBoardManager;
 GameManager.prototype.mAIManager;
 
+GameManager.prototype.mHumanTurn;
 GameManager.prototype.mGameOver;
 
 function GameManager() {
@@ -32,6 +35,8 @@ GameManager.prototype.startGame = function() {
 
     // refresh the draw view
     this.refreshDraw();
+
+    this.mHumanTurn = true;
 }
 
 GameManager.prototype.humanGo = function(i, j) {
@@ -139,17 +144,21 @@ GameManager.prototype.handlePlayAgainClick = function() {
 GameManager.prototype.handleBoardUnitClick = function(i, j) {
     if(!this.mGameOver) {
         // if the player selected a valid move then continue, else do nothing
-        if(this.humanGo(i, j)) {
+        if(this.mHumanTurn && this.humanGo(i, j)) {
+            this.mHumanTurn = false;
             
             // the player may have won, check
             this.checkGameState();
             
             if(!this.mGameOver) {
-                // let the computer go
-                this.mAIManager.computerGo();
-            
-                // the computer may have won, check
-                this.checkGameState();
+                // let the computer go after a delay
+                var thisScope = this;
+                setTimeout(function() {
+                    thisScope.mAIManager.computerGo();
+                    thisScope.checkGameState();
+                    thisScope.refreshDraw();
+                    thisScope.mHumanTurn = true;
+                }, this.CPU_TURN_DELAY);
             }
 
             // refresh the view of the game board

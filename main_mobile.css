@@ -1,0 +1,45 @@
+
+.tttText {
+    font-size: 96px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.spot {
+    background-color: #E6E6E6;
+    width: 256px;
+    height: 256px;
+    margin: 16px;
+}
+
+.tttButton {
+    background-color: #ccc;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    outline: 0;
+    width: 100%;
+}
+
+.gameOverMessage {
+    display: none;
+    margin-top: 160px;
+}
+
+#game {
+    margin: 0 auto;
+    display: table;
+}
+
+#gameBoard {
+    margin-top: 160px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#main {
+    width: 100%;
+}
