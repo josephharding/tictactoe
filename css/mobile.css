@@ -1,5 +1,5 @@
 
-.tttText {
+.ticText {
     font-size: 48px;
     margin: 0 auto;
     text-align: center;
@@ -12,7 +12,7 @@
     height: 128px;
 }
 
-.tttButton {
+.ticButton {
     background-color: #ccc;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;

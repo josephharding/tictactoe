@@ -5,9 +5,7 @@ $(document).ready(function() {
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) { 
         $("head").append("<link rel='stylesheet' type='text/css' href='css/mobile.css'>");
     } else {
-        $("head").append("<link rel='stylesheet' type='text/css' href='css/screen.css'>", function() {
-            alert("load complete");   
-        });
+        $("head").append("<link rel='stylesheet' type='text/css' href='css/screen.css'>");
     }
     // create the game manager object
     var gameManager = new GameManager();
